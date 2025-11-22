@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>神経衰弱ゲーム</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f2f2f2;
+      text-align: center;
+      padding: 10px;
+    }
+    #game {
+      width: 100%;
+      max-width: 840px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+      gap: 10px;
+    }
+    .card {
+      width: 100%;
+      padding-top: 70%; /* 横幅に応じて高さ可変（スマホ対応） */
+      position: relative;
+      background: #0077c8;
+      border-radius: 8px;
+      cursor: pointer;
+      overflow: hidden;
+    }
+    .card img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+    .flipped img, .matched img {
+      display: block;
+    }
+    .matched {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    @media (max-width: 480px) {
+      h1 { font-size: 1.4rem; }
+      p { font-size: 0.9rem; }
+    }
+  </style>
+</head>
+<body>
+  <h1>神経衰弱ゲーム</h1>
+  <p>カードをクリックして同じ画像をそろえてね！</p>
+  <div id="game"></div>
+
+  <script>
+    const images = [
+      '/mnt/data/20250928_9.jpeg',
+      '/mnt/data/20251022_1.png',
+      '/mnt/data/20251022_4.jpeg',
+      '/mnt/data/20251101_1.jpeg',
+      '/mnt/data/20251117_4.jpeg'
+    ];
+
+    // 画像を2枚ずつに増やしてシャッフル
+    let cards = [...images, ...images]
+      .map(src => ({ src, id: Math.random() }))
+      .sort(() => Math.random() - 0.5);
+
+    const game = document.getElementById('game');
+    let flipped = [];
+
+    cards.forEach(card => {
+      const div = document.createElement('div');
+      div.className = 'card';
+
+      const img = document.createElement('img');
+      img.src = card.src;
+      div.appendChild(img);
+
+      div.addEventListener('click', () => flipCard(div, card));
+      game.appendChild(div);
+    });
+
+    function flipCard(div, card) {
+      if (div.classList.contains('flipped') || div.classList.contains('matched')) return;
+      if (flipped.length === 2) return;
+
+      div.classList.add('flipped');
+      flipped.push({ div, card });
+
+      if (flipped.length === 2) {
+        const [a, b] = flipped;
+        if (a.card.src === b.card.src) {
+          a.div.classList.add('matched');
+          b.div.classList.add('matched');
+          flipped = [];
+        } else {
+          setTimeout(() => {
+            a.div.classList.remove('flipped');
+            b.div.classList.remove('flipped');
+            flipped = [];
+          }, 800);
+        }
+      }
+    }
+  </script>
+</body>
+</html>
